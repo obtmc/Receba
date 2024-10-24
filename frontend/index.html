@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RECEBA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .recibo {
+      border: 1px solid #000;
+      padding: 20px;
+      width: 500px;
+      margin: 0 auto;
+    }
+    .campo {
+      margin-bottom: 10px;
+    }
+    label {
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>RECEBA</h1>
+  <div class="recibo">
+    <div class="campo">
+      <label for="nome">Nome do Recebedor:</label>
+      <input type="text" id="nome" placeholder="Digite o nome">
+    </div>
+
+    <div class="campo">
+      <label for="valor">Valor:</label>
+      <input type="text" id="valor" placeholder="Digite o valor">
+    </div>
+
+    <div class="campo">
+      <label for="data">Data:</label>
+      <input type="date" id="data">
+    </div>
+
+    <button onclick="gerarRecibo()">Gerar PDF</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    function gerarRecibo() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const nome = document.getElementById('nome').value;
+      const valor = document.getElementById('valor').value;
+      const data = document.getElementById('data').value;
+
+      doc.text(`Recibo de Pagamento`, 20, 20);
+      doc.text(`Nome: ${nome}`, 20, 30);
+      doc.text(`Valor: R$ ${valor}`, 20, 40);
+      doc.text(`Data: ${data}`, 20, 50);
+
+      doc.save('recibo.pdf');
+    }
+  </script>
+
+</body>
+</html>

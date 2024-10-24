@@ -26,6 +26,12 @@
       padding: 8px;
       margin-top: 5px;
     }
+    #texto-para-pdf {
+      width: 180px; /* Largura máxima do texto */
+      margin: 20px; /* Margem */
+      text-align: justify; /* Justifica o texto */
+      font-size: 12px; /* Tamanho da fonte */
+    }
   </style>
 </head>
 <body>
@@ -61,7 +67,47 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
   <script>
+    // Função para justificar o texto
+    function addJustifiedText(doc, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let line = '';
+        let lines = [];
+
+        // Monta as linhas que cabem na largura máxima
+        words.forEach(word => {
+            const testLine = line + word + ' ';
+            const testWidth = doc.getTextWidth(testLine);
+
+            if (testWidth > maxWidth && line !== '') {
+                lines.push(line.trim());
+                line = word + ' ';
+            } else {
+                line = testLine;
+            }
+        });
+
+        lines.push(line.trim()); // Adiciona a última linha
+
+        // Escreve as linhas no PDF
+        lines.forEach((lineText, i) => {
+            const wordsInLine = lineText.split(' ');
+            let spacing = (maxWidth - doc.getTextWidth(lineText)) / (wordsInLine.length - 1);
+            let currentX = x;
+
+            // Se for a última linha ou se houver apenas uma palavra na linha, não justifica
+            if (i === lines.length - 1 || wordsInLine.length === 1) {
+                doc.text(lineText, x, y + i * lineHeight);
+            } else {
+                wordsInLine.forEach((word, j) => {
+                    doc.text(word, currentX, y + i * lineHeight);
+                    currentX += doc.getTextWidth(word) + spacing; // Aplica o espaço entre as palavras
+                });
+            }
+        });
+    }
+
     function gerarRecibo() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
@@ -72,12 +118,18 @@
       const servico = document.getElementById('servico').value;
       const data = document.getElementById('data').value;
 
-      doc.text(`RECIBO`, 20, 20);
-      doc.text(`Eu ${nome}, inscrit@ com o CPF ${cpf}, declaro que recebi o valor de ${valor} da FETAEPE, referente ${servico}.`, 20, 40, { maxWidth: 180 });
-      <!--doc.text(`Valor: R$ ${valor}`, 20, 50);-->
-      doc.text(`Data: ${data}`, 20, 60);
+      const texto = `Eu ${nome}, inscrit@ com o CPF ${cpf}, declaro que recebi o valor de ${valor} da FETAEPE, referente ${servico}.`;
+      
+      doc.text(`RECIBO`, 20, 10);
 
-      doc.save('recibo.pdf');
+      // Justifica o texto na posição desejada
+      addJustifiedText(doc, texto, 20, 30, 180, 10);
+
+      // Adiciona a data (não precisa justificar)
+      doc.text(`Data: ${data}`, 20, 70);
+
+      // Salva o PDF
+      doc.save("recibO.pdf");
     }
   </script>
 

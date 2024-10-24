@@ -1,2 +1,2 @@
 # Receba
-Aplicação web geradora de recibos apartir de informações fornecidas pelo usuário
+Aplicação web geradora de recibos a partir de informações fornecidas pelo usuário

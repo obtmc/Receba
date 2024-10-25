@@ -45,7 +45,7 @@
 
     <div class="campo">
         <label for="cpf">CPF:</label>
-        <input type="text" id="cpf" placeholder="Digite o cpf">
+        <input type="text" id="cpf" placeholder="Digite o CPF">
       </div>
 
     <div class="campo">
@@ -67,46 +67,8 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   <script>
-    // Função para justificar o texto
-    function addJustifiedText(doc, text, x, y, maxWidth, lineHeight) {
-        const words = text.split(' ');
-        let line = '';
-        let lines = [];
-
-        // Monta as linhas que cabem na largura máxima
-        words.forEach(word => {
-            const testLine = line + word + ' ';
-            const testWidth = doc.getTextWidth(testLine);
-
-            if (testWidth > maxWidth && line !== '') {
-                lines.push(line.trim());
-                line = word + ' ';
-            } else {
-                line = testLine;
-            }
-        });
-
-        lines.push(line.trim()); // Adiciona a última linha
-
-        // Escreve as linhas no PDF
-        lines.forEach((lineText, i) => {
-            const wordsInLine = lineText.split(' ');
-            let spacing = (maxWidth - doc.getTextWidth(lineText)) / (wordsInLine.length - 1);
-            let currentX = x;
-
-            // Se for a última linha ou se houver apenas uma palavra na linha, não justifica
-            if (i === lines.length - 1 || wordsInLine.length === 1) {
-                doc.text(lineText, x, y + i * lineHeight);
-            } else {
-                wordsInLine.forEach((word, j) => {
-                    doc.text(word, currentX, y + i * lineHeight);
-                    currentX += doc.getTextWidth(word) + spacing; // Aplica o espaço entre as palavras
-                });
-            }
-        });
-    }
 
     function gerarRecibo() {
       const { jsPDF } = window.jspdf;
@@ -116,21 +78,37 @@
       const cpf = document.getElementById('cpf').value;
       const valor = document.getElementById('valor').value;
       const servico = document.getElementById('servico').value;
-      const data = document.getElementById('data').value;
+      const dataBruta = document.getElementById('data').value;
+
+      // Formatar a data para DD-MM-YYYY
+      const dataFormatada = formatarData(dataBruta);
 
       const texto = `Eu ${nome}, inscrit@ com o CPF ${cpf}, declaro que recebi o valor de ${valor} da FETAEPE, referente ${servico}.`;
-      
-      doc.text(`RECIBO`, 20, 10);
 
-      // Justifica o texto na posição desejada
-      addJustifiedText(doc, texto, 20, 30, 180, 10);
+      // Configurando jsPDF-AutoTable para criar o recibo
+      doc.autoTable({
+        startY: 20, // Posição inicial
+        margin: { horizontal: 20 },
+        tableWidth: 'wrap',
+        body: [
+            [{ content: `RECIBO`, styles: { halign: 'center', fontSize: 16, fontStyle: 'bold' } }],
+            [{ content: texto, styles: { cellWidth: 180, halign: 'justify' } }],
+            [{ content: `Recife-PE, ${dataFormatada}`, styles: { halign: 'right' } }],
+        ],
+        theme: 'plain', // Sem bordas e temas
+        styles: { fontSize: 12, textColor: 0 },
+      });
 
-      // Adiciona a data (não precisa justificar)
-      doc.text(`Data: ${data}`, 20, 70);
-
-      // Salva o PDF
-      doc.save("recibO.pdf");
+      // Salvar o PDF
+      doc.save('recibo.pdf');
     }
+
+    // Função para formatar a data de "YYYY-MM-DD" para "DD-MM-YYYY"
+    function formatarData(data) {
+      const partes = data.split('-');
+      return `${partes[2]}-${partes[1]}-${partes[0]}`;
+    }
+    
   </script>
 
 </body>
